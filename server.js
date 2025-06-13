@@ -1,16 +1,18 @@
-const express = require('express');
-const path = require('path');
-const app = express();
-const port = 80;
+const FtpSrv = require('ftp-srv');
 
-// Indique le dossier public (ici, le dossier courant)
-app.use(express.static(__dirname));
-
-// Route par défaut
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+const ftpServer = new FtpSrv({
+  url: "ftp://0.0.0.0:21",  // écoute sur toutes les interfaces au port 21
+  anonymous: true           // permet accès anonyme (optionnel)
 });
 
-app.listen(port, () => {
-  console.log(`Serveur lancé sur http://localhost:${port}`);
+ftpServer.on('login', ({connection, username, password}, resolve, reject) => {
+  // Ici tu peux vérifier username/password
+  // Exemple : accepter tout le monde
+  resolve({ root: __dirname }); // dossier racine du serveur FTP
 });
+
+ftpServer.listen()
+  .then(() => {
+    console.log('Serveur FTP lancé sur ftp://localhost:21');
+  })
+  .catch(err => console.error(err));
